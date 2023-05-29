@@ -17,7 +17,7 @@ import time
 
 from caicpy import LOGGER
 import caicpy.client
-import caicpy.models
+import caicpy.utils
 
 
 LOGGER.setLevel(10)
@@ -55,28 +55,6 @@ def gen_years(start_year=10, end_year=23, year_prefix=20):
         yield prefix + suffix
 
 
-def find_classic_id(report: caicpy.models.FieldReport) -> int | None:
-    clsc_id_locs = ["avalanche_detail", "snowpack_detail", "weather_detail"]
-    clsc_rprt_id_locs = ["avalanche_observations", "snowpack_observations", "weather_observations"]
-
-    # Search in detail objects first, for less loops.
-    for loc in clsc_id_locs:
-        details = getattr(report, loc, None)
-        if details and getattr(details, "classic_id", None) is not None:
-            return details.classic_id
-
-    # Then, if we didn't find anything in details, loop through all
-    # observations
-    #  of a report to find one with a classic report id.
-    for loc in clsc_rprt_id_locs:
-        obs = getattr(report, loc, [])
-        for ob in obs:
-            if ob and getattr(ob, "classic_observation_report_id", None) is not None:
-                return ob.classic_observation_report_id
-
-    return None
-
-
 async def main():
     args = parser.parse_args()
 
@@ -109,7 +87,7 @@ async def main():
 
     id_map = {}
     for report in field_reports:
-        _id = find_classic_id(report)
+        _id = caicpy.utils.find_classic_id(report)
         if _id and _id not in id_map.keys():
             id_map[_id] = report.id
 
