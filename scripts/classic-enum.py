@@ -1,20 +1,33 @@
-"""Enumerate all classic IDs and tie them to their new CAIC UUIDs."""
+"""Enumerate all classic IDs and tie them to their new CAIC UUIDs.
 
+Also saves downloaded field reports for later processing.
+
+The cli only supports single years, but the actual code supports multiple years.
+The CAIC API starts to return 504s when we query over multiple years.
+
+The CAIC API only has field report data back to 2010.
+"""
+
+import argparse
 import asyncio
 import json
-import logging
 import functools
 import string
 import time
 
 from caicpy import LOGGER
 import caicpy.client
+import caicpy.models
 
 
-LOGGER.setLevel(logging.DEBUG)
+LOGGER.setLevel(10)
 
 YearStart = string.Template("$year-01-01 00:00:00")
 YearEnd = string.Template("$year-12-31 23:39:59")
+
+parser = argparse.ArgumentParser(description=__doc__,)
+parser.add_argument("year", help="The year to enumerate classic ids for (YY).", type=int)
+
 
 # CAIC API data only goes back to 2010
 def gen_years(start_year=10, end_year=23, year_prefix=20):
@@ -42,11 +55,35 @@ def gen_years(start_year=10, end_year=23, year_prefix=20):
         yield prefix + suffix
 
 
+def find_classic_id(report: caicpy.models.FieldReport) -> int | None:
+    clsc_id_locs = ["avalanche_detail", "snowpack_detail", "weather_detail"]
+    clsc_rprt_id_locs = ["avalanche_observations", "snowpack_observations", "weather_observations"]
+
+    # Search in detail objects first, for less loops.
+    for loc in clsc_id_locs:
+        details = getattr(report, loc, None)
+        if details and getattr(details, "classic_id", None) is not None:
+            return details.classic_id
+
+    # Then, if we didn't find anything in details, loop through all
+    # observations
+    #  of a report to find one with a classic report id.
+    for loc in clsc_rprt_id_locs:
+        obs = getattr(report, loc, [])
+        for ob in obs:
+            if ob and getattr(ob, "classic_observation_report_id", None) is not None:
+                return ob.classic_observation_report_id
+
+    return None
+
+
 async def main():
+    args = parser.parse_args()
+
     client = caicpy.client.CaicClient()
 
     field_report_requests = []
-    for year in gen_years(start_year=21, end_year=21):
+    for year in gen_years(start_year=args.year, end_year=args.year):
         field_report_requests.append(
             functools.partial(
                 client.field_reports,
@@ -67,16 +104,16 @@ async def main():
             field_reports.append(report)
 
     now = int(time.time())
-    with open(f"data/field_reports/{now}.json", "w") as fd:
+    with open(f"../data/field_reports/{args.year}.json", "w") as fd:
         json.dump([r.model_dump(mode="json") for r in field_reports], fd)
 
     id_map = {}
     for report in field_reports:
-        if (_id := report.avalanche_detail.classic_id):
-            if _id not in id_map.keys():
-                id_map[_id] = report.id
+        _id = find_classic_id(report)
+        if _id and _id not in id_map.keys():
+            id_map[_id] = report.id
 
-    with open(f"data/classic_ids/{now}_clsc_ids.json", "w") as fd:
+    with open(f"../data/classic_ids/{args.year}_clsc_ids.json", "w") as fd:
         json.dump(id_map, fd)
 
     await client.close()
