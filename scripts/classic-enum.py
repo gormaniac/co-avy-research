@@ -25,8 +25,12 @@ LOGGER.setLevel(10)
 YearStart = string.Template("$year-01-01 00:00:00")
 YearEnd = string.Template("$year-12-31 23:39:59")
 
-parser = argparse.ArgumentParser(description=__doc__,)
-parser.add_argument("year", help="The year to enumerate classic ids for (YY).", type=int)
+parser = argparse.ArgumentParser(
+    description=__doc__,
+)
+parser.add_argument(
+    "year", help="The year to enumerate classic ids for (YY).", type=int
+)
 
 
 # CAIC API data only goes back to 2010
@@ -70,8 +74,10 @@ async def main():
                 page_limit=1000,
             )
         )
-    
-    _field_reports = await asyncio.gather(*[func() for func in field_report_requests], return_exceptions=True)
+
+    _field_reports = await asyncio.gather(
+        *[func() for func in field_report_requests], return_exceptions=True
+    )
 
     field_reports = []
     for reports in _field_reports:
