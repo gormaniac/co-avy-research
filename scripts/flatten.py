@@ -1,6 +1,8 @@
 """"Flatten" the objects found in certain dirs.
 
 Operates on the files named ``##.json`` and flattens all objects within them.
+
+Don't commit flattened field reports to git as the file is too big.
 """
 
 import json
