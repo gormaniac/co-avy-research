@@ -4,8 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-fastapi = "*"
-pydantic = "*"
 caicpy = {path = "./../caicpy/dist/caicpy-0.1.6.tar.gz"}
 
 [dev-packages]
