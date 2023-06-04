@@ -15,9 +15,9 @@ import functools
 import string
 import time
 
-from caicpy import LOGGER
-import caicpy.client
-import caicpy.utils
+from caic_python import LOGGER
+import caic_python.client
+import caic_python.utils
 
 
 LOGGER.setLevel(10)
@@ -62,7 +62,7 @@ def gen_years(start_year=10, end_year=23, year_prefix=20):
 async def main():
     args = parser.parse_args()
 
-    client = caicpy.client.CaicClient()
+    client = caic_python.client.CaicClient()
 
     field_report_requests = []
     for year in gen_years(start_year=args.year, end_year=args.year):
@@ -93,7 +93,7 @@ async def main():
 
     id_map = {}
     for report in field_reports:
-        _id = caicpy.utils.find_classic_id(report)
+        _id = caic_python.utils.find_classic_id(report)
         if _id and _id not in id_map.keys():
             id_map[_id] = report.id
 

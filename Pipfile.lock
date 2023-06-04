@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "eae209f573d203149d7397c39cdfb8b7c0abe92272c9d7adfb6ba28205100440"
+            "sha256": "82d2d3347cee2a38fd6f2be4adeea1845f63453748be07c3739ddabc4e283d88"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -141,12 +141,13 @@
             "markers": "python_version >= '3.7'",
             "version": "==23.1.0"
         },
-        "caicpy": {
+        "caic-python": {
             "hashes": [
-                "sha256:c381f548911d29c6e7aa7f7c6d283b8d46178a6c7bfcefbda1a9c8d07d04ad2c"
+                "sha256:281ad419d6790a1fce7199bcb9e64de37ca3b9803d659a3bf3c962ffef5a4ec0",
+                "sha256:36bff4ffcad8603ea177af77837af23e885212496781f7620b16be150a93e67f"
             ],
-            "path": "./../caicpy/dist/caicpy-0.1.6.tar.gz",
-            "version": "==0.1.6"
+            "index": "pypi",
+            "version": "==0.1.10"
         },
         "charset-normalizer": {
             "hashes": [
